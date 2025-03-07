@@ -8,7 +8,6 @@ const currency = z
     "Price must have exactly 2 decimal places"
   );
 
-// Schema for inseting products
 export const insertProductSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
   slug: z.string().min(3, "Slug must be at least 3 characters"),
