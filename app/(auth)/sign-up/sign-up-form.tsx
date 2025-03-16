@@ -13,7 +13,6 @@ import Link from "next/link";
 export default function SignUpForm() {
   const [data, action] = useActionState(signUpUser, {
     success: false,
-    errors: [],
     message: "",
   });
 
@@ -85,14 +84,11 @@ export default function SignUpForm() {
         <div>
           <SignUpButton />
         </div>
-        
-        {data?.errors?.length > 0 && (
-          <ul className="mt-4 text-red-500">
-            {data.errors.map((error, index) => (
-              <li key={index}>{error}</li>
-            ))}
-          </ul>
+
+        {data && !data.success && (
+          <div className="text-center text-destructive">{data.message}</div>
         )}
+
         <div className="text-sm text-center text-muted-foreground">
           Already have an account?{" "}
           <Link href="/sign-in" target="_self" className="link">

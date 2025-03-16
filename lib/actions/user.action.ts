@@ -6,6 +6,7 @@ import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { hashSync } from "bcrypt-ts-edge";
 import { prisma } from "@/db/primsa";
 import { signUpFormSchema } from "../validator";
+import { formatError } from "../utils";
 
 // Sign in the user with credentials
 export async function signInWithCredentials(
@@ -41,48 +42,32 @@ export async function signOutUser() {
 // Signup User
 export async function signUpUser(prevState: unknown, formData: FormData) {
   try {
-    const validatedFields = signUpFormSchema.safeParse({
+    const user = signUpFormSchema.parse({
       name: formData.get("name"),
       email: formData.get("email"),
       password: formData.get("password"),
       confirmPassword: formData.get("confirmPassword"),
     });
+    const plainPassword = user.password;
 
-    if (!validatedFields.success) {
-      const fieldErrors = validatedFields.error.flatten().fieldErrors;
-      return {
-        success: false,
-        errors: Object.values(fieldErrors),
-        message: "Unable to register user",
-      };
-    }
-
-    const plainPassword = validatedFields.data.password;
-    const hashedPassword = hashSync(validatedFields.data.password, 10);
-
+    user.password = hashSync(user.password, 10);
     await prisma.user.create({
       data: {
-        name: validatedFields.data.name,
-        email: validatedFields.data.email,
-        password: hashedPassword,
+        name: user.name,
+        email: user.email,
+        password: user.password,
       },
     });
-
     await signIn("credentials", {
-      email: validatedFields.data.email,
+      email: user.email,
       password: plainPassword,
     });
 
-    return {
-      success: true,
-      errors: [],
-      message: "User registered successfully",
-    };
+    return { success: true, message: "User registered successfully" };
   } catch (error) {
     if (isRedirectError(error)) {
       throw error;
     }
-
-    return { success: false, message: "Unable to register user", errors: [] };
+    return { success: false, message: formatError(error) };
   }
 }
