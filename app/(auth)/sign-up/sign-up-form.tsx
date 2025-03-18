@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signUpDefaultValue } from "@/lib/constants";
-import { signUpUser } from "@/lib/actions/user.action";
+import { signUpUser } from "@/lib/actions/user.actions";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { useSearchParams } from "next/navigation";

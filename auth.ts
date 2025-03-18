@@ -3,6 +3,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/db/primsa";
 import { compareSync } from "bcrypt-ts-edge";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { authConfig } from "./auth.config";
 
 export const config = {
   pages: {
@@ -10,7 +11,7 @@ export const config = {
     error: "/sign-in",
   },
   session: {
-    strategy: "jwt",
+    strategy: "jwt" as const,
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   adapter: PrismaAdapter(prisma),
@@ -63,8 +64,6 @@ export const config = {
       session.user.role = token.role;
       session.user.name = token.name;
 
-      console.log(token);
-
       // If there is an update, set the user name
       if (trigger === "update") {
         session.user.name = user.name;
@@ -93,7 +92,10 @@ export const config = {
 
       return token;
     },
+    ...authConfig.callbacks,
   },
-} satisfies NextAuthConfig;
+};
 
-export const { handlers, auth, signIn, signOut } = NextAuth(config);
+export const { handlers, auth, signIn, signOut } = NextAuth(
+  config as NextAuthConfig
+);
