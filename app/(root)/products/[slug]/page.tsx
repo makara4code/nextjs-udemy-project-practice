@@ -5,6 +5,8 @@ import ProductPrice from "@/components/shared/product/product-price";
 import { Card, CardContent } from "@/components/ui/card";
 import ProductImages from "@/components/shared/product/product-images";
 import AddToCart from "@/components/shared/product/add-to-cart";
+import { getMyCart } from "@/lib/actions/cart.actions";
+import { Cart } from "@/types";
 
 export default async function ProductDetail({
   params,
@@ -15,6 +17,8 @@ export default async function ProductDetail({
 
   const product = await getProductBySlug(slug);
   if (!product) notFound();
+
+  const cart = await getMyCart();
 
   return (
     <section>
@@ -71,6 +75,7 @@ export default async function ProductDetail({
               {product.stock > 0 && (
                 <div className="flex-center">
                   <AddToCart
+                    cart={cart as Cart}
                     item={{
                       productId: product.id,
                       name: product.name,
