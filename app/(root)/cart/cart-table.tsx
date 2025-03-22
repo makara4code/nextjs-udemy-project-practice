@@ -3,8 +3,8 @@
 import { Cart } from "@/types";
 import { toast } from "sonner";
 import { useTransition } from "react";
-import { addItemToCart, removeItemFromCart } from "@/lib/actions/cart.actions";
-import { Loader, Minus, Plus } from "lucide-react";
+import { addToCart, removeItemFromCart } from "@/lib/actions/cart.actions";
+import { ArrowRight, Loader, Minus, Plus } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -15,9 +15,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { formatCurrency } from "@/lib/utils";
+import { Card, CardContent } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 
 export default function CartTable({ cart }: { cart?: Cart }) {
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   return (
     <>
@@ -88,7 +92,7 @@ export default function CartTable({ cart }: { cart?: Cart }) {
                         type="button"
                         onClick={() =>
                           startTransition(async () => {
-                            const res = await addItemToCart(item);
+                            const res = await addToCart(item);
 
                             if (res.success) {
                               toast.success(res.message);
@@ -111,6 +115,30 @@ export default function CartTable({ cart }: { cart?: Cart }) {
               </TableBody>
             </Table>
           </div>
+          <Card>
+            <CardContent className="p-4 gap-4">
+              <div className="pb-3 text-xl">
+                Subtotal ({cart.items.reduce((acc, curr) => acc + curr.qty, 0)})
+                <span className="font-bold">
+                  {formatCurrency(cart.itemsPrice)}
+                </span>
+              </div>
+              <Button
+                className="w-full"
+                disabled={isPending}
+                onClick={() => {
+                  startTransition(() => router.push("/shipping-address"));
+                }}
+              >
+                {isPending ? (
+                  <Loader className="w-4 h-4 animate-spin" />
+                ) : (
+                  <ArrowRight className="w-4 h-4"></ArrowRight>
+                )}
+                Process to checkout
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       )}
     </>
